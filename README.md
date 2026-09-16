@@ -21,4 +21,12 @@ This folder is ready to deploy as a static website/PWA.
 - Ball 4 records `PAResult=Walk`, resets the count, and advances to the next batter automatically.
 - Strike 3 on a called or swinging strike records `PAResult=Strikeout`, adds an out, resets the count, and advances automatically. If it is the third out, the half-inning ends automatically.
 - Undo restores the pre-pitch count, outs, batter, and lineup position.
-Connected to Vercel for automatic production deployments.
+
+## v4.6 in-play update
+- Choosing **In Play** now opens a Play Result panel.
+- Results: Out, Double Play, 1B, 2B, 3B, HR, Error, Fielder's Choice, Sac Fly, Sac Bunt.
+- Out adds 1 out; Double Play adds 2; Sac Fly/Sac Bunt add 1.
+- Fielder's Choice asks whether 0, 1, or 2 outs were recorded.
+- Every in-play result completes the plate appearance and advances to the next batter.
+- If the play creates the third out, the half-inning ends automatically.
+- CSV exports include PlayResult and OutsOnPlay.

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<meta name="theme-color" content="#123a68" />
+<meta name="apple-mobile-web-app-title" content="Logan Logger" />
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+
+<title>Logan Road Pitch Logger</title>
+<style>
+  :root{
+    --blue:#123a68;--blue2:#1f5a95;--light:#f4f7fb;--border:#c8d2df;--red:#b8272f;--green:#2f7d46;--amber:#b97813;--ink:#17212b;--muted:#66717d;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:#e9eef5}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif;background:#e9eef5;color:var(--ink);padding-bottom:env(safe-area-inset-bottom)}
+  button,input,select{font:inherit}
+  button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+  header{background:var(--blue);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
+  header h1{font-size:20px;margin:0;letter-spacing:.4px} header .small{font-size:12px;opacity:.9}
+  main{max-width:1180px;margin:auto;padding:12px;display:grid;grid-template-columns:1fr 1.05fr;gap:12px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .wide{grid-column:1/-1}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.row>*{min-width:0}
+  label{font-size:12px;font-weight:700;color:#4e5b68} input,select{font-size:16px;min-height:46px;padding:9px;border:1px solid #adb8c5;border-radius:8px;background:#fff;color:var(--ink)}
+  input[type=number]{width:94px}.field{display:flex;flex-direction:column;gap:4px}.grow{flex:1;min-width:170px}.medium{min-width:150px}
+  .scorebar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}.scoreitem{background:var(--light);padding:8px;border-radius:8px;border:1px solid #d6dfe8}.scoreitem b{display:block;font-size:20px}.scoreitem span{font-size:11px;color:#5b6672}
+  h2{font-size:15px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.4px;color:var(--blue)}
+  h3{font-size:13px;margin:10px 0 6px;color:#44566a}
+  .buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.buttons button,.actionbar button,.utility button,.filebtn{font-size:16px;font-weight:700;border:0;border-radius:9px;min-height:48px;padding:11px 8px;cursor:pointer;background:#dce6f1;color:#16283d;touch-action:manipulation}
+  .buttons button.active{background:var(--blue);color:white}.result-buttons{grid-template-columns:repeat(3,1fr)}
+  .zone-wrap{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}.zone-area{position:relative;width:min(44vw,360px);height:min(55vw,440px);max-width:360px;max-height:440px;min-width:290px;min-height:350px;background:#eef4fa;border-radius:10px;border:1px solid #b9c5d2;overflow:hidden;touch-action:none;cursor:crosshair}
+  .zone-grid{position:absolute;left:25%;right:25%;top:22%;bottom:22%;border:3px solid #26394f;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+  .zone-grid div{border:1px solid rgba(38,57,79,.45)}.plate{position:absolute;left:42%;right:42%;bottom:8%;height:4%;background:#fff;border:2px solid #26394f;clip-path:polygon(0 0,100% 0,80% 100%,20% 100%)}
+  .dot{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:var(--red);border:2px solid white;box-shadow:0 0 0 1px #5f1218;pointer-events:none}.zone-help{text-align:center;font-size:12px;color:#65717d;margin-top:5px}
+  .selected{font-size:13px;background:#f5f8fb;border:1px solid #d5dee7;border-radius:8px;padding:8px;min-width:160px}
+  .actionbar{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:10px}.save{background:var(--green)!important;color:#fff!important;font-size:19px!important}.undo{background:#eef0f2!important}.danger{background:var(--red)!important;color:#fff!important}.secondary{background:var(--blue2)!important;color:#fff!important}.amber{background:var(--amber)!important;color:#fff!important}
+  .utility{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.utility button{padding:10px 6px;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px solid #dde4eb;padding:6px;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#f0f4f8;color:#35475a}.tablewrap{max-height:270px;overflow:auto;-webkit-overflow-scrolling:touch}
+  .status{font-size:12px;padding:8px;border-radius:7px;background:#eef5ee;color:#2f6940;margin-top:8px;display:none}.status.show{display:block}
+  .footer-note,.tiny{font-size:11px;color:var(--muted)}.footer-note{margin-top:7px}
+  .roster-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.roster-box{border:1px solid #d7e0e9;border-radius:10px;padding:10px;background:#f8fafc}.roster-box strong{display:block;color:var(--blue);margin-bottom:6px}.roster-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.roster-file-status{font-size:12px;margin-top:7px;color:#536579;min-height:16px}.roster-file-status.ok{color:#11733b;font-weight:700}.roster-file-status.err{color:#b42318;font-weight:700}.roster-preview{font-size:12px;color:#334a61;margin-top:6px;line-height:1.45;min-height:18px}.roster-preview b{color:#123a68}
+  input[type=file]{display:none}.filebtn{display:inline-flex;align-items:center;justify-content:center;background:var(--blue2);color:#fff;font-size:13px;min-height:44px;padding:9px 12px}.ghostbtn{background:#eef2f6!important;color:#2a3b4e!important}.badge{display:inline-block;border-radius:999px;padding:5px 8px;font-size:12px;font-weight:700;background:#e7edf4;color:#415267}.badge.ok{background:#e7f4e9;color:#2f6940}
+  .player-card{background:#f7f9fc;border:1px solid #d7e0e9;border-radius:10px;padding:9px;margin-top:8px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.player-card .who{font-weight:800;color:#263a50}.player-card .sub{font-size:11px;color:#6b7681;margin-top:2px}.team-pill{font-size:11px;font-weight:800;color:white;background:var(--blue);border-radius:999px;padding:5px 8px}
+  .manual{display:none;margin-top:7px}.manual.show{display:flex;gap:7px;align-items:end;flex-wrap:wrap}
+  .warning{background:#fff7e7;border:1px solid #efd39c;color:#6c4b0b;padding:8px;border-radius:8px;font-size:12px;margin-top:8px}
+
+  .lineup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lineup-panel{border:1px solid #d7e0e9;border-radius:10px;background:#f8fafc;padding:10px}.lineup-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}.lineup-head strong{color:var(--blue);font-size:14px}.lineup-list{display:grid;gap:6px}.lineup-row{display:grid;grid-template-columns:42px 1fr;gap:7px;align-items:center}.lineup-spot{display:flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;border-radius:8px;min-height:44px;font-weight:900}.lineup-row select{width:100%;min-height:44px}.lineup-actions{display:flex;gap:6px;flex-wrap:wrap}.lineup-actions button{border:0;border-radius:8px;min-height:42px;padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer}.lineup-info{margin-top:8px;padding:8px 10px;background:#edf4fb;border:1px solid #ccdae8;border-radius:8px;font-size:12px;color:#344b62}.lineup-info b{color:var(--blue)}.lineup-active{background:#e7f4e9!important;color:#2f6940!important}.lineup-strip{margin-top:7px;padding:8px 10px;border-radius:8px;background:#f0f5fa;border:1px solid #d5e0ea;font-size:12px;color:#44566a}.lineup-strip b{color:var(--blue)}
+  .modal{position:fixed;inset:0;z-index:100;background:rgba(16,29,43,.55);display:none;align-items:flex-end;justify-content:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}.modal.show{display:flex}.modal-sheet{width:min(760px,100%);max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;background:#fff;border-radius:16px 16px 12px 12px;box-shadow:0 18px 50px rgba(0,0,0,.28);padding:14px}.modal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:-14px;background:#fff;padding:14px 0 10px;z-index:2}.modal-top h2{margin:0}.closebtn{border:0;background:#e9eef4;color:#26384a;border-radius:9px;min-width:46px;min-height:46px;font-size:22px;font-weight:800}.modal-help{font-size:12px;color:var(--muted);margin:0 0 10px}.modal-controls{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.modal-controls button{border:0;border-radius:9px;min-height:46px;padding:10px 13px;font-weight:800;cursor:pointer}.lineup-list.modal-list{max-height:54vh;overflow:auto;-webkit-overflow-scrolling:touch;padding-right:2px}.set-lineup-btn{background:var(--blue2)!important;color:#fff!important}.badge.lineup-badge{margin-left:auto}
+  @media(max-width:800px){main{grid-template-columns:1fr;padding:8px}.wide{grid-column:auto}.scorebar{grid-template-columns:repeat(4,1fr)}.utility{grid-template-columns:repeat(2,1fr)}.buttons{grid-template-columns:repeat(4,1fr)}header h1{font-size:17px}.zone-area{width:92vw;height:105vw;max-height:430px}.roster-grid{grid-template-columns:1fr}.lineup-grid{grid-template-columns:1fr}.row{align-items:stretch}.field.grow{min-width:calc(50% - 8px)}}
+  @media(max-width:520px){.buttons{grid-template-columns:repeat(3,1fr)}.result-buttons{grid-template-columns:repeat(2,1fr)}.scorebar{grid-template-columns:repeat(4,1fr)}header .small{display:none}.actionbar{grid-template-columns:1fr 1fr}.field.grow{min-width:100%}}
+
+  .pwa-bar{max-width:1180px;margin:10px auto 0;padding:0 12px;display:none}.pwa-bar.show{display:block}.pwa-inner{background:#fff;border:1px solid var(--border);border-radius:11px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}.pwa-copy{font-size:12px;color:#4e5b68;line-height:1.35}.pwa-copy b{color:var(--blue)}.pwa-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pwa-actions button{border:0;border-radius:8px;min-height:40px;padding:8px 11px;font-weight:800;cursor:pointer}.install-btn{background:var(--blue2);color:#fff}.dismiss-btn{background:#eef2f6;color:#2a3b4e}.net-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#38a169;margin-right:5px}.net-dot.offline{background:#c05621}@media (display-mode:standalone){.pwa-bar{display:none!important}}@media(max-width:700px){.pwa-inner{align-items:flex-start;flex-direction:column}.pwa-actions{width:100%}.pwa-actions button{flex:1}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>LOGAN ROAD PITCH LOGGER</h1><div class="small">Desktop + iPad • roster-based lineups • autosave • CSV export • V4.2</div></div>
+  <button id="newGameBtn" style="background:#fff;color:#123a68;border:0;border-radius:8px;min-height:44px;padding:9px 12px;font-weight:700">NEW GAME</button>
+</header>
+<div class="pwa-bar" id="pwaBar"><div class="pwa-inner"><div class="pwa-copy" id="pwaCopy"><span class="net-dot" id="netDot"></span><b>Logan Logger</b> is ready.</div><div class="pwa-actions"><button class="install-btn" id="installPwaBtn" type="button" style="display:none">INSTALL APP</button><button class="dismiss-btn" id="dismissPwaBtn" type="button">HIDE</button></div></div></div>
+<main>
+  <section class="card wide">
+    <h2>1. Game + Rosters</h2>
+    <div class="row">
+      <div class="field grow"><label>Opponent</label><input id="opponent" placeholder="Opponent" /></div>
+      <div class="field"><label>Date</label><input id="gameDate" type="date" /></div>
+      <div class="field medium"><label>Logan is</label><select id="loganHome"><option value="Away">Away</option><option value="Home">Home</option></select></div>
+    </div>
+    <div class="roster-grid" style="margin-top:10px">
+      <div class="roster-box">
+        <strong>Logan Roster</strong>
+        <div class="roster-actions">
+          <button class="filebtn" id="loadLoganRoster" type="button" onclick="triggerRosterFile('logan')">LOAD LOGAN CSV</button><input id="loganRosterFile" type="file" accept=".csv,.txt,text/csv,text/plain,application/vnd.ms-excel" onchange="handleRosterFileInput(this,'logan')" />
+          <button class="filebtn set-lineup-btn" id="setLoganLineup" type="button">SET LINEUP</button>
+          <button class="filebtn ghostbtn" id="clearLoganRoster" type="button">CLEAR</button>
+          <span class="badge" id="loganRosterBadge">No roster</span>
+          <span class="badge lineup-badge" id="loganLineupBadge">Lineup not set</span>
+        </div>
+        <div class="roster-file-status" id="loganRosterStatus">Ready — choose a CSV roster file.</div><div class="roster-preview" id="loganRosterPreview"></div>
+      </div>
+      <div class="roster-box">
+        <strong>Opponent Roster</strong>
+        <div class="roster-actions">
+          <button class="filebtn" id="loadOppRoster" type="button" onclick="triggerRosterFile('opponent')">LOAD OPPONENT CSV</button><input id="oppRosterFile" type="file" accept=".csv,.txt,text/csv,text/plain,application/vnd.ms-excel" onchange="handleRosterFileInput(this,'opponent')" />
+          <button class="filebtn set-lineup-btn" id="setOppLineup" type="button">SET LINEUP</button>
+          <button class="filebtn ghostbtn" id="clearOppRoster" type="button">CLEAR</button>
+          <span class="badge" id="oppRosterBadge">No roster</span>
+          <span class="badge lineup-badge" id="oppLineupBadge">Lineup not set</span>
+        </div>
+        <div class="roster-file-status" id="oppRosterStatus">Ready — choose a CSV roster file.</div><div class="roster-preview" id="oppRosterPreview"></div>
+      </div>
+    </div>
+    <div class="roster-actions" style="margin-top:8px">
+      <span class="tiny">Roster CSV only needs player information: #/Number, Name or First+Last, Bats, Throws, Position. Load the full roster, then tap SET LINEUP to build the batting order from those players.</span>
+    </div>
+  </section>
+
+  <section class="card wide">
+    <div class="scorebar">
+      <div class="scoreitem"><b id="inningDisp">1</b><span>INNING</span></div>
+      <div class="scoreitem"><b id="halfDisp">TOP</b><span>HALF</span></div>
+      <div class="scoreitem"><b id="ballsDisp">0</b><span>BALLS</span></div>
+      <div class="scoreitem"><b id="strikesDisp">0</b><span>STRIKES</span></div>
+      <div class="scoreitem"><b id="outsDisp">0</b><span>OUTS</span></div>
+      <div class="scoreitem"><b id="paDisp">1</b><span>PA</span></div>
+      <div class="scoreitem"><b id="pitchDisp">1</b><span>NEXT PITCH</span></div>
+    </div>
+  </section>
+
+  <section class="card wide">
+    <h2>2. Matchup</h2>
+    <div class="row">
+      <div class="field grow"><label id="pitcherLabel">Current Pitcher</label><select id="pitcherSelect"></select></div>
+      <div class="field"><label>Throws</label><select id="pitcherHand"><option>R</option><option>L</option></select></div>
+      <div class="field grow"><label id="batterLabel">Current Batter</label><select id="batterSelect"></select></div>
+      <div class="field"><label>Bats</label><select id="batterSide"><option>R</option><option>L</option><option>S</option></select></div>
+    </div>
+    <div class="manual" id="pitcherManual">
+      <div class="field grow"><label>Manual Pitcher</label><input id="pitcherManualName" placeholder="Pitcher name / #" /></div>
+    </div>
+    <div class="manual" id="batterManual">
+      <div class="field grow"><label>Manual Batter</label><input id="batterManualName" placeholder="Batter name / #" /></div>
+    </div>
+    <div class="player-card">
+      <div><div class="who" id="matchupText">Load rosters or choose Manual Entry.</div><div class="sub" id="matchupSub">The correct team roster will switch automatically by half-inning.</div></div>
+      <span class="team-pill" id="teamPill">TOP 1</span>
+    </div>
+    <div class="lineup-strip" id="lineupStrip">Lineup mode is not active for the batting team.</div>
+  </section>
+
+  <section class="card">
+    <h2>3. Pitch Type</h2>
+    <div class="buttons" id="pitchButtons"></div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <div class="field"><label>Velocity</label><input id="velo" type="number" min="40" max="110" inputmode="numeric" pattern="[0-9]*" placeholder="mph" /></div>
+      <div class="field grow"><label>Optional Note</label><input id="note" placeholder="pickoff, runner, etc." /></div>
+    </div>
+    <h2 style="margin-top:13px">4. Pitch Result</h2>
+    <div class="buttons result-buttons" id="resultButtons"></div>
+    <div class="selected" id="selectionSummary" style="margin-top:10px">Choose pitch type, result, and location.</div>
+    <div class="actionbar">
+      <button class="save" id="savePitch">SAVE PITCH</button>
+      <button class="undo" id="undoPitch">↶ UNDO</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>5. Pitch Location — Catcher View</h2>
+    <div class="zone-wrap">
+      <div>
+        <div class="zone-area" id="zoneArea" aria-label="pitch location chart" role="button">
+          <div class="zone-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+          <div class="plate"></div>
+          <div class="dot" id="locDot" style="display:none"></div>
+        </div>
+        <div class="zone-help">Tap where the catcher received the pitch. Left/right is from the catcher’s view.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card wide">
+    <h2>Game Controls</h2>
+    <div class="utility">
+      <button class="secondary" id="nextBatter">NEXT BATTER</button>
+      <button class="secondary" id="newPitcher">NEW PITCHER</button>
+      <button class="amber" id="addOut">+ OUT</button>
+      <button id="endHalf">END HALF</button>
+      <button id="resetCount">RESET COUNT</button>
+    </div>
+    <div class="footer-note">The roster menu automatically changes to the team currently pitching/batting. With lineup mode active, NEXT BATTER resets the count and advances to the next lineup spot automatically. Ball 4 and strike 3 now complete the PA and advance automatically; strikeouts also add an out. Without a saved lineup, it falls back to manual roster selection.</div>
+  </section>
+
+  <section class="card wide">
+    <h2>Pitch Log</h2>
+    <div class="tablewrap"><table><thead><tr><th>#</th><th>Inn</th><th>Count</th><th>Pitcher</th><th>Batter</th><th>Type</th><th>Velo</th><th>Result</th><th>PA Result</th><th>X</th><th>Z</th></tr></thead><tbody id="logBody"></tbody></table></div>
+    <div class="utility" style="margin-top:10px;grid-template-columns:repeat(4,1fr)">
+      <button class="secondary" id="exportSynergy">EXPORT SYNERGY CSV</button>
+      <button class="secondary" id="exportTrackman">EXPORT TRACKMAN-STYLE CSV</button>
+      <button id="exportBackup">BACKUP JSON</button>
+      <button class="danger" id="clearLog">CLEAR PITCHES</button>
+    </div>
+    <div class="warning" id="safariNote">On iPad Safari, export uses the Share sheet when supported. Choose <b>Save to Files</b>, AirDrop, Mail, or another destination.</div>
+    <div class="status" id="status"></div>
+  </section>
+</main>
+<div class="modal" id="lineupModal" aria-hidden="true">
+  <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="lineupModalTitle">
+    <div class="modal-top">
+      <h2 id="lineupModalTitle">Set Lineup</h2>
+      <button class="closebtn" id="closeLineupModal" type="button" aria-label="Close lineup setup">×</button>
+    </div>
+    <p class="modal-help">Choose the batting order from the loaded roster. Starts with 9 spots; use + ADD SPOT for 10, 11, 12, or more. NEXT BATTER will cycle through the exact number of saved lineup spots.</p>
+    <div class="lineup-list modal-list" id="modalLineupEditor"></div>
+    <div class="modal-controls">
+      <button class="secondary" id="addLineupSpot" type="button">+ ADD SPOT</button>
+      <button class="ghostbtn" id="removeLineupSpot" type="button">− REMOVE LAST</button>
+      <button class="save" id="saveLineupModal" type="button">SAVE LINEUP</button>
+      <button class="ghostbtn" id="clearLineupModal" type="button">CLEAR LINEUP</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const PITCH_TYPES=['FB','SI','CT','SL','CB','CH','SP','KN'];
+const RESULTS=['Ball','Called Strike','Swinging Strike','Foul','In Play','HBP'];
+const STORAGE_KEY='loganRoadPitchLoggerV4';
+let selectedPitch='', selectedResult='', pitchLocation=null;
+let state={inning:1,half:'TOP',balls:0,strikes:0,outs:0,pa:1,pitches:[],game:{},rosters:{logan:[],opponent:[]},currentPitcherByTeam:{logan:'',opponent:''},currentBatterByTeam:{logan:'',opponent:''},lineups:{logan:Array(9).fill(''),opponent:Array(9).fill('')},lineupIndex:{logan:0,opponent:0},lineupActive:{logan:false,opponent:false}};
+const $=id=>document.getElementById(id);
+
+function pitchLong(x){return ({FB:'Fastball',SI:'Sinker',CT:'Cutter',SL:'Slider',CB:'Curveball',CH:'Changeup',SP:'Splitter',KN:'Knuckleball'})[x]||x}
+function resultCode(x){return ({'Ball':'BallCalled','Called Strike':'StrikeCalled','Swinging Strike':'StrikeSwinging','Foul':'FoulBall','In Play':'InPlay','HBP':'HitByPitch'})[x]||x}
+function todayLocal(){const d=new Date();const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function escCSV(v){v=(v??'').toString();return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function showStatus(msg){const el=$('status');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200)}
+function normalizeHeader(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
+function cleanHand(v, allowSwitch=false){const s=String(v||'').trim().toUpperCase();if(allowSwitch&&s.startsWith('S'))return 'S';if(s.startsWith('L'))return 'L';return 'R'}
+function teamName(team){return team==='logan'?'Logan':($('opponent').value.trim()||'Opponent')}
+function roleTeams(){
+  const loganHome=$('loganHome').value==='Home';
+  const battingIsHome=state.half==='BOTTOM';
+  const loganBatting=loganHome===battingIsHome;
+  return {batterTeam:loganBatting?'logan':'opponent',pitcherTeam:loganBatting?'opponent':'logan'};
+}
+function playerKey(p){return `${p.number||''}|${p.name||''}`}
+function playerDisplay(p){return `${p.number?('#'+p.number+' '):''}${p.name||'Unknown'}${p.position?(' — '+p.position):''}`}
+function getPlayer(team,key){return (state.rosters[team]||[]).find(p=>playerKey(p)===key)||null}
+function ensureLineupState(){
+  state.lineups=state.lineups||{logan:Array(9).fill(''),opponent:Array(9).fill('')};
+  state.lineupIndex=state.lineupIndex||{logan:0,opponent:0};
+  state.lineupActive=state.lineupActive||{logan:false,opponent:false};
+  for(const team of ['logan','opponent']){
+    if(!Array.isArray(state.lineups[team])||!state.lineups[team].length)state.lineups[team]=Array(9).fill('');
+    if(state.lineups[team].length<9)while(state.lineups[team].length<9)state.lineups[team].push('');
+    const max=Math.max(0,state.lineups[team].length-1);
+    if(!Number.isInteger(state.lineupIndex[team])||state.lineupIndex[team]<0||state.lineupIndex[team]>max)state.lineupIndex[team]=0;
+    state.lineupActive[team]=!!state.lineupActive[team];
+  }
+}
+let modalTeam=null;
+let lineupDraft=[];
+function lineupBadgeId(team){return team==='logan'?'loganLineupBadge':'oppLineupBadge'}
+function lineupSelectId(i){return `modalLineup${i}`}
+function buildLineupEditor(team){
+  if(modalTeam!==team)return;const wrap=$('modalLineupEditor');if(!wrap)return;wrap.innerHTML='';const roster=state.rosters[team]||[];
+  lineupDraft.forEach((key,i)=>{
+    const row=document.createElement('div');row.className='lineup-row';
+    const spot=document.createElement('div');spot.className='lineup-spot';spot.textContent=String(i+1);
+    const sel=document.createElement('select');sel.id=lineupSelectId(i);sel.setAttribute('aria-label',`${teamName(team)} lineup spot ${i+1}`);
+    const blank=document.createElement('option');blank.value='';blank.textContent=roster.length?'Select player…':'Load roster first';sel.appendChild(blank);
+    roster.forEach(p=>{const o=document.createElement('option');o.value=playerKey(p);o.textContent=playerDisplay(p);sel.appendChild(o)});
+    if(key&&Array.from(sel.options).some(o=>o.value===key))sel.value=key;
+    sel.addEventListener('change',()=>{lineupDraft[i]=sel.value});
+    row.appendChild(spot);row.appendChild(sel);wrap.appendChild(row);
+  });
+}
+function renderLineupEditors(){ensureLineupState();updateLineupBadges()}
+function updateLineupBadges(){
+  ensureLineupState();for(const team of ['logan','opponent']){const el=$(lineupBadgeId(team));if(!el)continue;const filled=state.lineups[team].filter(Boolean).length;el.textContent=state.lineupActive[team]?`Lineup: ${filled} spots`:'Lineup not set';el.classList.toggle('lineup-active',state.lineupActive[team]);el.classList.toggle('ok',state.lineupActive[team]);}
+}
+function openLineupModal(team){
+  ensureLineupState();const roster=state.rosters[team]||[];if(!roster.length){alert(`Load the ${teamName(team)} roster first.`);return}
+  modalTeam=team;const existing=state.lineupActive[team]?state.lineups[team].slice():state.lineups[team].slice();
+  lineupDraft=existing.length>=9?existing:Array(9).fill('');
+  if(!lineupDraft.some(Boolean))lineupDraft=Array(9).fill('');
+  $('lineupModalTitle').textContent=`Set ${teamName(team)} Lineup`;$('lineupModal').classList.add('show');$('lineupModal').setAttribute('aria-hidden','false');buildLineupEditor(team);
+}
+function closeLineupModal(){
+  $('lineupModal').classList.remove('show');$('lineupModal').setAttribute('aria-hidden','true');modalTeam=null;lineupDraft=[];
+}
+function addLineupSpot(){
+  if(!modalTeam)return;const roster=state.rosters[modalTeam]||[];if(lineupDraft.length>=roster.length){alert('There are no more roster players available to add as another lineup spot.');return}lineupDraft.push('');buildLineupEditor(modalTeam);const wrap=$('modalLineupEditor');if(wrap)wrap.scrollTop=wrap.scrollHeight;
+}
+function removeLineupSpot(){
+  if(!modalTeam||lineupDraft.length<=9){showStatus('Lineups keep a minimum of 9 spots.');return}lineupDraft.pop();buildLineupEditor(modalTeam);
+}
+function validateLineup(arr){const filled=arr.filter(Boolean);return {filled:filled.length,blank:filled.length!==arr.length,duplicate:new Set(filled).size!==filled.length}}
+function saveLineup(team){
+  if(!team)team=modalTeam;if(!team)return;const arr=lineupDraft.slice(),v=validateLineup(arr);if(v.blank){alert('Choose a player for every lineup spot, or remove unused spots.');return}if(v.duplicate){alert('A player is listed more than once in this batting order.');return}if(arr.length<9){alert('A lineup must have at least 9 spots.');return}
+  state.lineups[team]=arr;state.lineupActive[team]=true;if(state.lineupIndex[team]>=arr.length)state.lineupIndex[team]=0;
+  updateLineupBadges();const roles=roleTeams();if(roles.batterTeam===team)setBatterFromLineup(team);saveLocal();closeLineupModal();render();showStatus(`${teamName(team)} ${arr.length}-spot lineup saved.`)
+}
+function clearLineup(team){
+  if(!team)team=modalTeam;if(!team)return;if(!confirm(`Clear the ${teamName(team)} batting order?`))return;ensureLineupState();state.lineups[team]=Array(9).fill('');state.lineupIndex[team]=0;state.lineupActive[team]=false;state.currentBatterByTeam[team]='';updateLineupBadges();const roles=roleTeams();if(roles.batterTeam===team){$('batterSelect').value='';handlePlayerSelection('batter')}saveLocal();closeLineupModal();render();
+}
+function firstFilledLineupIndex(team,start){
+  ensureLineupState();const arr=state.lineups[team],n=arr.length;if(!n)return 0;for(let step=0;step<n;step++){const idx=(start+step)%n;if(arr[idx])return idx}return 0
+}
+function nextFilledLineupIndex(team,current){
+  ensureLineupState();const arr=state.lineups[team],n=arr.length;if(!n)return current;for(let step=1;step<=n;step++){const idx=(current+step)%n;if(arr[idx])return idx}return current
+}
+function setBatterFromLineup(team){
+  ensureLineupState();if(!state.lineupActive[team])return false;let idx=state.lineupIndex[team];if(!state.lineups[team][idx])idx=firstFilledLineupIndex(team,idx);state.lineupIndex[team]=idx;const key=state.lineups[team][idx];if(!key)return false;
+  const sel=$('batterSelect');if(sel&&Array.from(sel.options).some(o=>o.value===key)){sel.value=key;$('batterManualName').value='';handlePlayerSelection('batter');state.currentBatterByTeam[team]=key;return true}return false
+}
+function lineupName(team,key){const p=getPlayer(team,key);return p?playerDisplay(p):'—'}
+function lineupContext(team){
+  ensureLineupState();if(!state.lineupActive[team])return null;const cur=state.lineupIndex[team],onDeck=nextFilledLineupIndex(team,cur),inHole=nextFilledLineupIndex(team,onDeck);return {spot:cur+1,total:state.lineups[team].length,current:lineupName(team,state.lineups[team][cur]),onDeckSpot:onDeck+1,onDeck:lineupName(team,state.lineups[team][onDeck]),inHoleSpot:inHole+1,inHole:lineupName(team,state.lineups[team][inHole])}
+}
+function recordBatterSubstitution(){
+  ensureLineupState();const roles=roleTeams(),team=roles.batterTeam;if(!state.lineupActive[team])return;const val=$('batterSelect').value;if(!val||val==='__manual__')return;const idx=state.lineupIndex[team];if(state.lineups[team][idx]!==val){state.lineups[team][idx]=val;if(modalTeam===team){lineupDraft=state.lineups[team].slice();buildLineupEditor(team)}updateLineupBadges();showStatus(`Substitution saved in ${teamName(team)} lineup spot ${idx+1}.`)}
+}
+
+function saveLocal(){
+  const roles=roleTeams();
+  const pitcher=getCurrentPitcher();
+  if(pitcher.name) state.currentPitcherByTeam[roles.pitcherTeam]=pitcher.key||`MANUAL|${pitcher.name}`;
+  const batter=getCurrentBatter();if(batter.name) state.currentBatterByTeam[roles.batterTeam]=batter.key||`MANUAL|${batter.name}`;
+  state.game={opponent:$('opponent').value,gameDate:$('gameDate').value,loganHome:$('loganHome').value};
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}
+}
+function loadLocal(){
+  try{const raw=localStorage.getItem(STORAGE_KEY)||localStorage.getItem('loganRoadPitchLoggerV3')||localStorage.getItem('loganRoadPitchLoggerV2');const s=raw?JSON.parse(raw):null;if(s&&Array.isArray(s.pitches)){state=Object.assign(state,s);state.rosters=state.rosters||{logan:[],opponent:[]};state.currentPitcherByTeam=state.currentPitcherByTeam||{logan:'',opponent:''};state.currentBatterByTeam=state.currentBatterByTeam||{logan:'',opponent:''};}}catch(e){}
+  ensureLineupState();
+  const g=state.game||{};$('opponent').value=g.opponent||'';$('gameDate').value=g.gameDate||todayLocal();$('loganHome').value=g.loganHome||'Away';
+  updateRosterBadges();renderLineupEditors();updatePlayerSelectors(true);render(false);
+}
+function makeButtons(){
+  PITCH_TYPES.forEach(p=>{const b=document.createElement('button');b.type='button';b.textContent=p;b.addEventListener('click',()=>{selectedPitch=p;document.querySelectorAll('#pitchButtons button').forEach(x=>x.classList.remove('active'));b.classList.add('active');updateSummary()});$('pitchButtons').appendChild(b)});
+  RESULTS.forEach(r=>{const b=document.createElement('button');b.type='button';b.textContent=r;b.addEventListener('click',()=>{selectedResult=r;document.querySelectorAll('#resultButtons button').forEach(x=>x.classList.remove('active'));b.classList.add('active');updateSummary()});$('resultButtons').appendChild(b)});
+}
+function updateSummary(){let loc=pitchLocation?`Loc ${pitchLocation.x.toFixed(2)}, ${pitchLocation.z.toFixed(2)}`:'No location';$('selectionSummary').textContent=`${selectedPitch||'No pitch'} • ${selectedResult||'No result'} • ${loc}`}
+function render(save=true){
+  $('inningDisp').textContent=state.inning;$('halfDisp').textContent=state.half;$('ballsDisp').textContent=state.balls;$('strikesDisp').textContent=state.strikes;$('outsDisp').textContent=state.outs;$('paDisp').textContent=state.pa;$('pitchDisp').textContent=state.pitches.length+1;$('teamPill').textContent=`${state.half} ${state.inning}`;
+  const tb=$('logBody');tb.innerHTML='';state.pitches.slice(-100).reverse().forEach(p=>{const tr=document.createElement('tr');[p.pitchNo,`${p.inning} ${p.half[0]}`,`${p.preBalls}-${p.preStrikes}`,p.pitcher,p.batter,p.pitchType,p.velocity||'',p.result,p.paResult||'',p.plateX??'',p.plateZ??''].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});tb.appendChild(tr)});
+  updateMatchupCard();if(save)saveLocal();
+}
+function zonePointFromEvent(e){
+  const rect=$('zoneArea').getBoundingClientRect();
+  const clientX=e.clientX!==undefined?e.clientX:(e.touches&&e.touches[0]?e.touches[0].clientX:0);
+  const clientY=e.clientY!==undefined?e.clientY:(e.touches&&e.touches[0]?e.touches[0].clientY:0);
+  let px=(clientX-rect.left)/rect.width,py=(clientY-rect.top)/rect.height;px=Math.min(1,Math.max(0,px));py=Math.min(1,Math.max(0,py));
+  const x=(px*7)-3.5,z=(1-py)*5;pitchLocation={px,py,x,z};const dot=$('locDot');dot.style.display='block';dot.style.left=(px*100)+'%';dot.style.top=(py*100)+'%';updateSummary();
+}
+function resetEntry(){selectedPitch='';selectedResult='';pitchLocation=null;$('velo').value='';$('note').value='';$('locDot').style.display='none';document.querySelectorAll('.buttons button').forEach(x=>x.classList.remove('active'));updateSummary()}
+function autoCount(result){if(result==='Ball'){state.balls++}else if(result==='Called Strike'||result==='Swinging Strike'){state.strikes++}else if(result==='Foul'){if(state.strikes<2)state.strikes++}else if(result==='In Play'||result==='HBP'){state.balls=0;state.strikes=0}}
+
+function populateSelect(select,team,kind,preserveKey=''){
+  const roster=state.rosters[team]||[];select.innerHTML='';
+  const first=document.createElement('option');first.value='';first.textContent=roster.length?`Select ${kind} — ${teamName(team)}`:`No ${teamName(team)} roster loaded`;select.appendChild(first);
+  roster.forEach(p=>{const o=document.createElement('option');o.value=playerKey(p);o.textContent=playerDisplay(p);select.appendChild(o)});
+  const manual=document.createElement('option');manual.value='__manual__';manual.textContent='Manual Entry…';select.appendChild(manual);
+  if(preserveKey && Array.from(select.options).some(o=>o.value===preserveKey))select.value=preserveKey;
+}
+function updatePlayerSelectors(restorePitcher=false){
+  const roles=roleTeams();
+  const oldPitch=$('pitcherSelect').value,oldBat=$('batterSelect').value;
+  populateSelect($('pitcherSelect'),roles.pitcherTeam,'pitcher',oldPitch);
+  populateSelect($('batterSelect'),roles.batterTeam,'batter',oldBat);
+  $('pitcherLabel').textContent=`Current Pitcher — ${teamName(roles.pitcherTeam)}`;$('batterLabel').textContent=`Current Batter — ${teamName(roles.batterTeam)}`;
+  if(restorePitcher){const stored=state.currentPitcherByTeam[roles.pitcherTeam]||'';if(stored.startsWith('MANUAL|')){$('pitcherSelect').value='__manual__';$('pitcherManualName').value=stored.split('|').slice(1).join('|')}else if(stored&&Array.from($('pitcherSelect').options).some(o=>o.value===stored)){$('pitcherSelect').value=stored}
+    const lineupKey=state.lineupActive&&state.lineupActive[roles.batterTeam]?(state.lineups[roles.batterTeam]||[])[state.lineupIndex[roles.batterTeam]||0]:'';
+    const storedB=state.currentBatterByTeam[roles.batterTeam]||'';if(lineupKey&&Array.from($('batterSelect').options).some(o=>o.value===lineupKey)){$('batterSelect').value=lineupKey}else if(storedB.startsWith('MANUAL|')){$('batterSelect').value='__manual__';$('batterManualName').value=storedB.split('|').slice(1).join('|')}else if(storedB&&Array.from($('batterSelect').options).some(o=>o.value===storedB)){$('batterSelect').value=storedB}}
+  handlePlayerSelection('pitcher');handlePlayerSelection('batter');updateMatchupCard();
+}
+function handlePlayerSelection(kind){
+  const roles=roleTeams(),isPitch=kind==='pitcher',sel=$(isPitch?'pitcherSelect':'batterSelect'),manual=$(isPitch?'pitcherManual':'batterManual');
+  manual.classList.toggle('show',sel.value==='__manual__');
+  if(sel.value&&sel.value!=='__manual__'){
+    const team=isPitch?roles.pitcherTeam:roles.batterTeam,p=getPlayer(team,sel.value);
+    if(p){if(isPitch)$('pitcherHand').value=cleanHand(p.throws);else $('batterSide').value=cleanHand(p.bats,true)}
+  }
+  if(isPitch){const p=getCurrentPitcher();if(p.name)state.currentPitcherByTeam[roles.pitcherTeam]=p.key||`MANUAL|${p.name}`}else{const b=getCurrentBatter();if(b.name)state.currentBatterByTeam[roles.batterTeam]=b.key||`MANUAL|${b.name}`}
+  updateMatchupCard();saveLocal();
+}
+function getCurrentPitcher(){
+  const roles=roleTeams(),sel=$('pitcherSelect').value;
+  if(sel==='__manual__')return {name:$('pitcherManualName').value.trim(),hand:$('pitcherHand').value,key:''};
+  const p=getPlayer(roles.pitcherTeam,sel);return p?{name:playerDisplay(p),hand:cleanHand(p.throws),key:sel,raw:p}:{name:'',hand:$('pitcherHand').value,key:''};
+}
+function getCurrentBatter(){
+  const roles=roleTeams(),sel=$('batterSelect').value;
+  if(sel==='__manual__')return {name:$('batterManualName').value.trim(),side:$('batterSide').value,key:''};
+  const p=getPlayer(roles.batterTeam,sel);return p?{name:playerDisplay(p),side:cleanHand(p.bats,true),key:sel,raw:p}:{name:'',side:$('batterSide').value,key:''};
+}
+function updateMatchupCard(){const p=getCurrentPitcher(),b=getCurrentBatter(),roles=roleTeams();$('matchupText').textContent=`${p.name||'Select pitcher'}  vs  ${b.name||'Select batter'}`;$('matchupSub').textContent=`${teamName(roles.pitcherTeam)} pitching • ${teamName(roles.batterTeam)} batting`;const c=lineupContext(roles.batterTeam),el=$('lineupStrip');if(c)el.innerHTML=`<b>Lineup spot ${c.spot} of ${c.total}</b> • On deck: ${c.onDeck} <b>(#${c.onDeckSpot})</b> • In hole: ${c.inHole} <b>(#${c.inHoleSpot})</b>`;else el.textContent=`Lineup mode is not active for ${teamName(roles.batterTeam)}.`}
+
+function savePitch(){
+  if(!selectedPitch){alert('Choose a pitch type.');return}if(!selectedResult){alert('Choose a pitch result.');return}if(!pitchLocation){alert('Tap a pitch location.');return}
+  const pitcher=getCurrentPitcher(),batter=getCurrentBatter();if(!pitcher.name){alert('Choose the current pitcher.');return}if(!batter.name){alert('Choose the current batter.');return}
+  const roles=roleTeams(),preB=state.balls,preS=state.strikes,preOuts=state.outs;
+  const isStrikeout=(preS===2&&(selectedResult==='Called Strike'||selectedResult==='Swinging Strike'));
+  const isWalk=(preB===3&&selectedResult==='Ball');
+  const paResult=isStrikeout?'Strikeout':(isWalk?'Walk':'');
+  const p={pitchNo:state.pitches.length+1,pa:state.pa,inning:state.inning,half:state.half,preBalls:preB,preStrikes:preS,preOuts:preOuts,pitcher:pitcher.name,pitcherHand:pitcher.hand,pitcherTeam:roles.pitcherTeam,batter:batter.name,batterSide:batter.side,batterTeam:roles.batterTeam,lineupSpot:state.lineupActive[roles.batterTeam]?(state.lineupIndex[roles.batterTeam]+1):'',batterKey:batter.key||'',pitchType:selectedPitch,pitchTypeLong:pitchLong(selectedPitch),velocity:$('velo').value?Number($('velo').value):'',result:selectedResult,pitchCall:resultCode(selectedResult),paResult:paResult,plateX:Number(pitchLocation.x.toFixed(2)),plateZ:Number(pitchLocation.z.toFixed(2)),note:$('note').value.trim(),timestamp:new Date().toISOString()};
+  state.pitches.push(p);
+  if(isStrikeout){
+    state.balls=0;state.strikes=0;state.outs++;
+    resetEntry();
+    if(state.outs>=3){showStatus('Strikeout — third out. Half-inning ended.');endHalf()}else{showStatus('Strikeout — next batter.');nextBatter()}
+    return;
+  }
+  if(isWalk){
+    state.balls=0;state.strikes=0;
+    resetEntry();showStatus('Walk — next batter.');nextBatter();return;
+  }
+  autoCount(selectedResult);render();resetEntry();
+}
+function nextBatter(){const roles=roleTeams(),team=roles.batterTeam;state.pa++;state.balls=0;state.strikes=0;$('batterManualName').value='';if(state.lineupActive[team]){state.lineupIndex[team]=nextFilledLineupIndex(team,state.lineupIndex[team]);state.currentBatterByTeam[team]='';setBatterFromLineup(team)}else{state.currentBatterByTeam[team]='';$('batterSelect').value='';handlePlayerSelection('batter')}render()}
+function newPitcher(){const roles=roleTeams();state.balls=0;state.strikes=0;state.currentPitcherByTeam[roles.pitcherTeam]='';$('pitcherSelect').value='';$('pitcherManualName').value='';handlePlayerSelection('pitcher');render()}
+function addOut(){state.outs++;if(state.outs>=3)endHalf();else render()}
+function endHalf(){state.outs=0;state.balls=0;state.strikes=0;state.pa++;if(state.half==='TOP'){state.half='BOTTOM'}else{state.half='TOP';state.inning++}$('batterManualName').value='';updatePlayerSelectors(true);render()}
+function undo(){if(!state.pitches.length)return;const p=state.pitches.pop();state.inning=p.inning;state.half=p.half;state.pa=p.pa;state.balls=p.preBalls;state.strikes=p.preStrikes;state.outs=(p.preOuts??state.outs);if(p.lineupSpot&&p.batterTeam&&state.lineupActive[p.batterTeam])state.lineupIndex[p.batterTeam]=Math.max(0,Math.min((state.lineups[p.batterTeam]||[]).length-1,Number(p.lineupSpot)-1));updatePlayerSelectors(true);restorePlayerFromPitch(p);render();showStatus('Last pitch removed.')}
+function restorePlayerFromPitch(p){
+  const roles=roleTeams();
+  const pr=(state.rosters[roles.pitcherTeam]||[]).find(x=>playerDisplay(x)===p.pitcher),br=(state.rosters[roles.batterTeam]||[]).find(x=>playerDisplay(x)===p.batter);
+  if(pr){$('pitcherSelect').value=playerKey(pr)}else{$('pitcherSelect').value='__manual__';$('pitcherManualName').value=p.pitcher}$('pitcherHand').value=p.pitcherHand||'R';
+  if(br){$('batterSelect').value=playerKey(br)}else{$('batterSelect').value='__manual__';$('batterManualName').value=p.batter}$('batterSide').value=p.batterSide||'R';
+  handlePlayerSelection('pitcher');handlePlayerSelection('batter');
+}
+
+function detectDelimiter(text){
+  const line=String(text||'').replace(/^\uFEFF/,'').split(/\r?\n/).find(x=>x.trim())||'';
+  const counts={',':0,'\t':0,';':0};let q=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i],n=line[i+1];
+    if(c==='"'){if(q&&n==='"'){i++;continue}q=!q;continue}
+    if(!q&&Object.prototype.hasOwnProperty.call(counts,c))counts[c]++;
+  }
+  const ranked=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  return ranked[0][1]>0?ranked[0][0]:',';
+}
+function parseCSV(text){
+  text=String(text||'').replace(/^\uFEFF/,'');const delim=detectDelimiter(text);
+  const rows=[];let row=[],cell='',q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i],n=text[i+1];
+    if(q){if(c==='"'&&n==='"'){cell+='"';i++}else if(c==='"')q=false;else cell+=c}
+    else{if(c==='"')q=true;else if(c===delim){row.push(cell);cell=''}else if(c==='\n'){row.push(cell.replace(/\r$/,''));rows.push(row);row=[];cell=''}else cell+=c}
+  }
+  row.push(cell.replace(/\r$/,''));if(row.some(x=>String(x).trim()!==''))rows.push(row);return rows;
+}
+function rosterFromCSV(text){
+  const rows=parseCSV(text).filter(r=>r.some(v=>String(v).trim()!==''));
+  if(rows.length<2)throw new Error('The file has no player rows. Make sure the roster is filled in and saved as CSV.');
+  const headers=rows[0].map(normalizeHeader);const idx=(...names)=>{for(const n of names){const i=headers.indexOf(n);if(i>=0)return i}return -1};
+  const iNum=idx('number','no','num','jersey','jerseynumber','playernumber','#'),iName=idx('name','player','playername','fullname'),iFirst=idx('first','firstname','first_name'),iLast=idx('last','lastname','last_name'),iBats=idx('bats','bat','batterhand','batterbats','b'),iThrows=idx('throws','throw','throwshand','pitcherhand','t'),iPos=idx('position','pos');
+  if(iName<0&&iFirst<0&&iLast<0)throw new Error('Could not find a Name column (or First/Last columns).');
+  const out=[];
+  for(let r=1;r<rows.length;r++){
+    const x=rows[r],val=i=>i>=0?String(x[i]??'').trim():'';let name=val(iName);
+    if(!name)name=[val(iFirst),val(iLast)].filter(Boolean).join(' ');if(!name)continue;
+    out.push({number:val(iNum).replace(/^#/,'').trim(),name,bats:cleanHand(val(iBats),true),throws:cleanHand(val(iThrows)),position:val(iPos)});
+  }
+  if(!out.length)throw new Error('No players with names were found in the file.');
+  return out;
+}
+function setRosterFileStatus(team,msg,kind=''){
+  const el=$(team==='logan'?'loganRosterStatus':'oppRosterStatus');if(!el)return;
+  el.textContent=msg;el.classList.remove('ok','err');if(kind)el.classList.add(kind);
+}
+function rosterPreviewId(team){return team==='logan'?'loganRosterPreview':'oppRosterPreview'}
+function renderRosterPreview(team){
+  const el=$(rosterPreviewId(team));if(!el)return;const roster=state.rosters[team]||[];
+  if(!roster.length){el.textContent='';return}
+  const first=roster.slice(0,6).map(p=>playerDisplay(p)).join(' • ');
+  el.innerHTML=`<b>${roster.length} players:</b> ${first}${roster.length>6?' • …':''}`;
+}
+function triggerRosterFile(team){
+  const input=$(team==='logan'?'loganRosterFile':'oppRosterFile');
+  if(!input){alert('Roster file input was not found.');return}
+  input.value='';
+  input.click();
+}
+function applyImportedRoster(team,roster,fileName){
+  state.rosters[team]=roster;
+  state.lineups[team]=Array(9).fill('');
+  state.lineupIndex[team]=0;
+  state.lineupActive[team]=false;
+  state.currentBatterByTeam[team]='';
+  updateRosterBadges();
+  renderRosterPreview(team);
+  renderLineupEditors();
+  updatePlayerSelectors(true);
+  render();
+  saveLocal();
+  setRosterFileStatus(team,`${roster.length} players loaded from ${fileName||'roster CSV'}.`,'ok');
+  showStatus(`${roster.length} ${team==='logan'?'Logan':'opponent'} players loaded. Tap SET LINEUP.`);
+}
+function handleRosterFileInput(input,team){
+  const file=input&&input.files&&input.files.length?input.files[0]:null;
+  if(!file){setRosterFileStatus(team,'No file selected.','err');return}
+  setRosterFileStatus(team,`Reading ${file.name||'roster'}…`);
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      const text=String(reader.result||'');
+      const roster=rosterFromCSV(text);
+      applyImportedRoster(team,roster,file.name);
+    }catch(err){
+      console.error('Roster import failed',err);
+      const msg=err&&err.message?err.message:'Could not read that roster.';
+      setRosterFileStatus(team,`Import failed: ${msg}`,'err');
+      alert('Roster import problem: '+msg);
+    }
+  };
+  reader.onerror=function(){
+    const msg='The browser could not read the selected file.';
+    setRosterFileStatus(team,`Import failed: ${msg}`,'err');
+    alert('Roster import problem: '+msg);
+  };
+  try{reader.readAsText(file,'UTF-8')}catch(err){
+    const msg=err&&err.message?err.message:'The browser could not start reading the file.';
+    setRosterFileStatus(team,`Import failed: ${msg}`,'err');
+    alert('Roster import problem: '+msg);
+  }
+}
+window.triggerRosterFile=triggerRosterFile;
+window.handleRosterFileInput=handleRosterFileInput;
+function updateRosterBadges(){for(const [team,id] of [['logan','loganRosterBadge'],['opponent','oppRosterBadge']]){const n=(state.rosters[team]||[]).length,el=$(id);el.textContent=n?`${n} players loaded`:'No roster';el.classList.toggle('ok',n>0);renderRosterPreview(team)}}
+function clearRoster(team){if(!confirm(`Clear the ${team==='logan'?'Logan':'opponent'} roster from this device?`))return;state.rosters[team]=[];state.currentPitcherByTeam[team]='';state.currentBatterByTeam[team]='';state.lineups[team]=Array(9).fill('');state.lineupIndex[team]=0;state.lineupActive[team]=false;updateRosterBadges();renderLineupEditors();updatePlayerSelectors(true);render();saveLocal();setRosterFileStatus(team,'Choose a CSV roster file.')}
+
+async function deliverFile(name,text,type='text/csv'){const blob=new Blob([text],{type});const file=new File([blob],name,{type});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500)}
+function fileBase(){const opp=($('opponent').value||'Opponent').replace(/[^A-Za-z0-9_-]+/g,'_');const where=$('loganHome').value==='Home'?'vs':'at';return `${$('gameDate').value||todayLocal()}_Logan_${where}_${opp}`}
+async function exportSynergy(){const headers=['GameDate','Opponent','LoganHomeAway','PitchNo','PA','Inning','Half','Pitcher','PitcherHand','PitcherTeam','Batter','BatterSide','BatterTeam','LineupSpot','Balls','Strikes','PitchType','PitchTypeLong','Velocity','PitchResult','PitchCall','PAResult','PlateLocSide','PlateLocHeight','Note','Timestamp'];const rows=state.pitches.map(p=>[$('gameDate').value,$('opponent').value,$('loganHome').value,p.pitchNo,p.pa,p.inning,p.half,p.pitcher,p.pitcherHand,p.pitcherTeam,p.batter,p.batterSide,p.batterTeam,p.lineupSpot||'',p.preBalls,p.preStrikes,p.pitchType,p.pitchTypeLong,p.velocity,p.result,p.pitchCall,p.paResult||'',p.plateX,p.plateZ,p.note,p.timestamp]);await deliverFile(fileBase()+'_Synergy.csv',[headers,...rows].map(r=>r.map(escCSV).join(',')).join('\r\n'));showStatus('Synergy CSV ready.')}
+async function exportTrackman(){const headers=['PitchNo','Date','Pitcher','PitcherThrows','Batter','BatterSide','Inning','Top/Bottom','PA','LineupSpot','Balls','Strikes','TaggedPitchType','RelSpeed','PitchCall','PlayResult','PAResult','PlateLocSide','PlateLocHeight','Notes'];const rows=state.pitches.map(p=>[p.pitchNo,$('gameDate').value,p.pitcher,p.pitcherHand,p.batter,p.batterSide,p.inning,p.half,p.pa,p.lineupSpot||'',p.preBalls,p.preStrikes,p.pitchTypeLong,p.velocity,p.pitchCall,p.result==='In Play'?'InPlay':'',p.paResult||'',p.plateX,p.plateZ,p.note]);await deliverFile(fileBase()+'_TrackmanStyle.csv',[headers,...rows].map(r=>r.map(escCSV).join(',')).join('\r\n'));showStatus('TrackMan-style CSV ready.')}
+async function exportBackup(){saveLocal();await deliverFile(fileBase()+'_Backup.json',JSON.stringify(state,null,2),'application/json');showStatus('Backup JSON ready.')}
+function newGame(){if(state.pitches.length&&!confirm('Start a new game? This clears the current pitch log. Rosters and saved lineups will stay loaded. Export first if needed.'))return;const rosters=state.rosters,lineups=state.lineups,lineupActive=state.lineupActive,currentPitcherByTeam={logan:'',opponent:''},currentBatterByTeam={logan:'',opponent:''};state={inning:1,half:'TOP',balls:0,strikes:0,outs:0,pa:1,pitches:[],game:{},rosters,currentPitcherByTeam,currentBatterByTeam,lineups,lineupIndex:{logan:0,opponent:0},lineupActive};$('opponent').value='';$('gameDate').value=todayLocal();$('loganHome').value='Away';$('pitcherManualName').value='';$('batterManualName').value='';resetEntry();renderLineupEditors();updatePlayerSelectors(true);render()}
+
+makeButtons();
+const zone=$('zoneArea');if(window.PointerEvent)zone.addEventListener('pointerdown',zonePointFromEvent,{passive:true});else zone.addEventListener('touchstart',zonePointFromEvent,{passive:true});
+$('savePitch').addEventListener('click',savePitch);$('undoPitch').addEventListener('click',undo);$('nextBatter').addEventListener('click',nextBatter);$('newPitcher').addEventListener('click',newPitcher);$('addOut').addEventListener('click',addOut);$('endHalf').addEventListener('click',endHalf);$('resetCount').addEventListener('click',()=>{state.balls=0;state.strikes=0;render()});
+$('exportSynergy').addEventListener('click',exportSynergy);$('exportTrackman').addEventListener('click',exportTrackman);$('exportBackup').addEventListener('click',exportBackup);
+$('clearLog').addEventListener('click',()=>{if(confirm('Clear all pitches?')){state.pitches=[];render()}});$('newGameBtn').addEventListener('click',newGame);
+$('clearLoganRoster').addEventListener('click',()=>clearRoster('logan'));$('clearOppRoster').addEventListener('click',()=>clearRoster('opponent'));
+$('pitcherSelect').addEventListener('change',()=>handlePlayerSelection('pitcher'));$('batterSelect').addEventListener('change',()=>{handlePlayerSelection('batter');recordBatterSubstitution();render()});
+$('setLoganLineup').addEventListener('click',()=>openLineupModal('logan'));$('setOppLineup').addEventListener('click',()=>openLineupModal('opponent'));$('closeLineupModal').addEventListener('click',closeLineupModal);$('addLineupSpot').addEventListener('click',addLineupSpot);$('removeLineupSpot').addEventListener('click',removeLineupSpot);$('saveLineupModal').addEventListener('click',()=>saveLineup(modalTeam));$('clearLineupModal').addEventListener('click',()=>clearLineup(modalTeam));$('lineupModal').addEventListener('click',e=>{if(e.target===$('lineupModal'))closeLineupModal()});
+$('pitcherManualName').addEventListener('input',()=>{updateMatchupCard();saveLocal()});$('batterManualName').addEventListener('input',()=>{updateMatchupCard();saveLocal()});$('pitcherHand').addEventListener('change',saveLocal);$('batterSide').addEventListener('change',saveLocal);
+$('opponent').addEventListener('change',()=>{renderLineupEditors();updatePlayerSelectors(true);render()});$('gameDate').addEventListener('change',saveLocal);$('loganHome').addEventListener('change',()=>{updatePlayerSelectors(true);render()});
+loadLocal();updateSummary();
+</script>
+
+<script>
+(function(){
+  'use strict';
+  const bar=document.getElementById('pwaBar'), copy=document.getElementById('pwaCopy'), dot=document.getElementById('netDot'), installBtn=document.getElementById('installPwaBtn'), dismissBtn=document.getElementById('dismissPwaBtn');
+  const standalone=window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  let deferredPrompt=null;
+  function updateNetwork(){
+    const online=navigator.onLine;
+    if(dot) dot.classList.toggle('offline',!online);
+    if(standalone){ if(copy) copy.innerHTML='<span class="net-dot '+(!online?'offline':'')+'"></span><b>'+(online?'Online':'Offline')+'</b> — game data stays on this device.'; return; }
+    if(copy){
+      if(!online) copy.innerHTML='<span class="net-dot offline"></span><b>Offline mode</b> — the logger still works and saves locally.';
+      else if(isIOS) copy.innerHTML='<span class="net-dot"></span><b>Install on iPad:</b> Safari → Share → Add to Home Screen.';
+      else copy.innerHTML='<span class="net-dot"></span><b>Logan Logger</b> can be installed as an app.';
+    }
+  }
+  if(bar && !standalone && localStorage.getItem('loganPwaHintHidden')!=='1') bar.classList.add('show');
+  updateNetwork();
+  window.addEventListener('online',updateNetwork); window.addEventListener('offline',updateNetwork);
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferredPrompt=e; if(installBtn) installBtn.style.display='inline-block'; if(bar) bar.classList.add('show'); });
+  if(installBtn) installBtn.addEventListener('click',async function(){ if(!deferredPrompt)return; deferredPrompt.prompt(); try{await deferredPrompt.userChoice}catch(e){} deferredPrompt=null; installBtn.style.display='none'; });
+  if(dismissBtn) dismissBtn.addEventListener('click',function(){ if(bar)bar.classList.remove('show'); localStorage.setItem('loganPwaHintHidden','1'); });
+  window.addEventListener('appinstalled',function(){ if(bar)bar.classList.remove('show'); });
+  if('serviceWorker' in navigator && location.protocol!=='file:'){
+    window.addEventListener('load',function(){ navigator.serviceWorker.register('./service-worker.js').catch(function(err){ console.warn('Service worker registration failed',err); }); });
+  }
+})();
+</script>
+
+</body>
+</html>

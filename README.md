@@ -21,3 +21,4 @@ This folder is ready to deploy as a static website/PWA.
 - Ball 4 records `PAResult=Walk`, resets the count, and advances to the next batter automatically.
 - Strike 3 on a called or swinging strike records `PAResult=Strikeout`, adds an out, resets the count, and advances automatically. If it is the third out, the half-inning ends automatically.
 - Undo restores the pre-pitch count, outs, batter, and lineup position.
+Connected to Vercel for automatic production deployments.

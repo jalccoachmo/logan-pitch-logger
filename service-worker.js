@@ -1,4 +1,4 @@
-const CACHE_NAME = 'logan-road-pitch-logger-v4.8-event-timestamps-1';
+const CACHE_NAME = 'logan-road-pitch-logger-v4.9-runs-1';
 const APP_SHELL = [
   './',
   './index.html',

@@ -32,5 +32,13 @@ This folder is ready to deploy as a static website/PWA.
 - CSV exports include PlayResult and OutsOnPlay.
 
 
-## V4.8 event timestamps
+## V4.9 event timestamps
 Every saved pitch is automatically stamped at the moment it is logged. Both CSV exports include `TimestampUTC`, `EventTimestamp`, and `LocalTime` for Synergy event-sync workflows. No video clock or manual sync-start step is required.
+
+
+## V4.9 — Runs Scored
+- Added Runs Scored (0–4) to every pitch/event.
+- Home Run and Sac Fly default to 1 run; tagger can change to 0–4.
+- Added automatic Logan and Opponent run totals to the scoreboard.
+- Added RunsScored, LoganScoreAfter, and OpponentScoreAfter to both CSV exports.
+- Runs are tied to the batting team and automatically reverse when the last pitch is undone.

@@ -30,3 +30,7 @@ This folder is ready to deploy as a static website/PWA.
 - Every in-play result completes the plate appearance and advances to the next batter.
 - If the play creates the third out, the half-inning ends automatically.
 - CSV exports include PlayResult and OutsOnPlay.
+
+
+## V4.8 event timestamps
+Every saved pitch is automatically stamped at the moment it is logged. Both CSV exports include `TimestampUTC`, `EventTimestamp`, and `LocalTime` for Synergy event-sync workflows. No video clock or manual sync-start step is required.

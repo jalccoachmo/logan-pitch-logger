@@ -42,3 +42,8 @@ Every saved pitch is automatically stamped at the moment it is logged. Both CSV 
 - Added automatic Logan and Opponent run totals to the scoreboard.
 - Added RunsScored, LoganScoreAfter, and OpponentScoreAfter to both CSV exports.
 - Runs are tied to the batting team and automatically reverse when the last pitch is undone.
+
+
+## V5.0 — Synergy sequence fields
+
+The CSV exports now calculate `PAofInning` and `PitchofPA` automatically from the pitch log. Taggers do not enter these values. `PAofInning` resets to 1 at each half-inning and increases for each new plate appearance; `PitchofPA` resets to 1 for each new plate appearance and increases for every pitch in that PA.
